@@ -16,7 +16,6 @@
       --primary-hover: #4f46e5;
       --success: #10b981;
       --danger: #ef4444;
-      --warning: #f59e0b;
       --ai-color: #ec4899;
     }
 
@@ -122,7 +121,6 @@
       padding: 10px;
       margin-bottom: 12px;
     }
-    .section-box label { color: var(--primary); }
 
     .btn { 
       padding: 11px; 
@@ -194,7 +192,6 @@
     }
     .btn-del:hover { background: rgba(239, 68, 68, 0.1); }
 
-    /* Barra de Navegação Inferior Estilizada */
     .nav-bar {
       position: fixed;
       bottom: 0;
@@ -204,7 +201,7 @@
       backdrop-filter: blur(10px);
       display: flex;
       justify-content: space-around;
-      padding: 8px 0;
+      padding: 10px 0;
       border-top: 1px solid var(--border);
       z-index: 1000;
     }
@@ -212,14 +209,13 @@
     .nav-btn {
       text-align: center;
       color: var(--text-muted);
-      font-size: 10px;
+      font-size: 11px;
       cursor: pointer;
       font-weight: 600;
       flex: 1;
       transition: color 0.2s;
     }
     
-    .nav-btn span { font-size: 15px; display: block; margin-bottom: 2px; }
     .nav-btn.active { color: var(--primary); }
 
     .alert-msg { 
@@ -238,7 +234,7 @@
   <div class="container">
     <div class="top-header">
       <h1>Painel de Hospedagem</h1>
-      <p>Gerencie seus slots e comandos do bot</p>
+      <p>Gerenciamento de slots e comandos</p>
     </div>
 
     <!-- TELA 1: BOTS -->
@@ -247,22 +243,22 @@
         <div class="field">
           <label>Slot Ativo</label>
           <select id="selectedBotSlot" onchange="mudarSlotBot()">
-            <option value="bot-1">Slot de Bot [ #1 ]</option>
-            <option value="bot-2">Slot de Bot [ #2 ]</option>
-            <option value="bot-3">Slot de Bot [ #3 ]</option>
-            <option value="bot-4">Slot de Bot [ #4 ]</option>
+            <option value="bot-1">Slot de Bot [ 1 ]</option>
+            <option value="bot-2">Slot de Bot [ 2 ]</option>
+            <option value="bot-3">Slot de Bot [ 3 ]</option>
+            <option value="bot-4">Slot de Bot [ 4 ]</option>
           </select>
         </div>
 
-        <div class="card-title" id="slotTitle" style="color: var(--primary);">Configurando: Slot #1</div>
+        <div class="card-title" id="slotTitle" style="color: var(--primary);">Configurando: Slot 1</div>
         
         <div class="field">
-          <label>Token Secreto do Discord</label>
+          <label>Token do Discord</label>
           <input type="password" id="botToken" placeholder="Cole o token do bot aqui...">
         </div>
         
-        <button class="btn btn-success" onclick="salvarELigar()">🚀 Ligar / Atualizar Bot</button>
-        <button class="btn btn-danger" onclick="desligarBot()">🛑 Desligar Slot</button>
+        <button class="btn btn-success" onclick="salvarELigar()">Ligar / Atualizar Bot</button>
+        <button class="btn btn-danger" onclick="desligarBot()">Desligar Slot</button>
         
         <div id="status-msg" class="alert-msg"></div>
       </div>
@@ -271,38 +267,30 @@
     <!-- TELA 2: COMANDOS -->
     <div id="commands" class="screen">
       <div class="card">
-        <div class="card-title" id="cmdSlotTitle">Novo Comando Slash (#1)</div>
+        <div class="card-title" id="cmdSlotTitle">Novo Comando Slash (Slot 1)</div>
         
         <div class="field">
           <label>Nome do Comando</label>
           <input type="text" id="cmdName" placeholder="/exemplo">
         </div>
 
-        <!-- Seção Opcional 1: Texto Simples -->
+        <!-- Opção 1: Script JS -->
         <div class="section-box">
           <div class="field" style="margin-bottom: 0;">
-            <label>Opção A: Resposta em Texto Simples (Opcional)</label>
-            <textarea id="cmdResponse" rows="2" placeholder="Digite uma mensagem fixa..." style="margin-top: 5px;"></textarea>
-          </div>
-        </div>
-
-        <!-- Seção Opcional 2: Script JS -->
-        <div class="section-box">
-          <div class="field" style="margin-bottom: 0;">
-            <label>Opção B: Script JavaScript (Opcional)</label>
+            <label>Script JavaScript (Opcional)</label>
             <textarea id="cmdScript" rows="3" placeholder="const lat = Date.now() - interaction.createdTimestamp;&#10;return `Pong! ${lat}ms`;" style="margin-top: 5px;"></textarea>
           </div>
         </div>
 
-        <!-- Seção Opcional 3: OpenAI API -->
+        <!-- Opção 2: API de IA (Recomendado Groq) -->
         <div class="section-box" style="border-color: rgba(236, 72, 153, 0.3);">
           <div class="field">
-            <label style="color: var(--ai-color);">Opção C: IA OpenAI (Opcional)</label>
-            <input type="password" id="aiKey" placeholder="Cole sua API Key sk-..." style="margin-top: 5px;">
+            <label style="color: var(--ai-color);">API de IA - Recomendado Groq (Opcional)</label>
+            <input type="password" id="aiKey" placeholder="Cole sua chave da API (Ex: gsk_...)" style="margin-top: 5px;">
           </div>
           <div class="field" style="margin-bottom: 0;">
-            <label style="color: var(--text-muted); font-size: 9px;">Modelo da IA</label>
-            <input type="text" id="aiModel" value="gpt-3.5-turbo" style="margin-top: 3px;">
+            <label style="color: var(--text-muted); font-size: 9px;">Modelo (Ex: llama-3.3-70b-versatile)</label>
+            <input type="text" id="aiModel" value="llama-3.3-70b-versatile" style="margin-top: 3px;">
           </div>
         </div>
 
@@ -323,8 +311,8 @@
           Adicione scripts prontos instantaneamente no slot atual.
         </p>
 
-        <button class="btn btn-test" onclick="injetarTeste('ping')">⚡ Injetar /ping (Latência)</button>
-        <button class="btn btn-test" onclick="injetarTeste('sorteio')">⚡ Injetar /sorteio (Randômico)</button>
+        <button class="btn btn-test" onclick="injetarTeste('ping')">Injetar /ping (Latência)</button>
+        <button class="btn btn-test" onclick="injetarTeste('sorteio')">Injetar /sorteio (Aleatório)</button>
 
         <div id="test-msg" class="alert-msg"></div>
       </div>
@@ -332,15 +320,9 @@
 
     <!-- MENU INFERIOR -->
     <div class="nav-bar">
-      <div class="nav-btn active" onclick="switchTab('dashboard', this)">
-        <span>⚙️</span>Bots
-      </div>
-      <div class="nav-btn" onclick="switchTab('commands', this)">
-        <span>💻</span>Comandos
-      </div>
-      <div class="nav-btn" onclick="switchTab('tests', this)">
-        <span>⚡</span>Testes
-      </div>
+      <div class="nav-btn active" onclick="switchTab('dashboard', this)">Bots</div>
+      <div class="nav-btn" onclick="switchTab('commands', this)">Comandos</div>
+      <div class="nav-btn" onclick="switchTab('tests', this)">Testes</div>
     </div>
   </div>
 
@@ -364,8 +346,8 @@
     function mudarSlotBot() {
       slotAtual = document.getElementById('selectedBotSlot').value;
       const num = slotAtual.replace('bot-', '');
-      document.getElementById('slotTitle').innerText = `Configurando: Slot #${num}`;
-      document.getElementById('cmdSlotTitle').innerText = `Novo Comando Slash (#${num})`;
+      document.getElementById('slotTitle').innerText = `Configurando: Slot ${num}`;
+      document.getElementById('cmdSlotTitle').innerText = `Novo Comando Slash (Slot ${num})`;
       document.getElementById('botToken').value = dadosBots[slotAtual].token;
       atualizarListaVisual();
     }
@@ -375,32 +357,27 @@
       if (!rawName) return alert('Digite o nome do comando!');
       const name = rawName.startsWith('/') ? rawName : '/' + rawName;
       
-      const responseText = document.getElementById('cmdResponse').value.trim();
       const scriptCode = document.getElementById('cmdScript').value.trim();
       const aiKey = document.getElementById('aiKey').value.trim();
       const aiModel = document.getElementById('aiModel').value.trim();
 
-      // Determina o tipo baseado no que o usuário preencheu
-      let type = 'text';
-      if (scriptCode) type = 'code';
+      let type = 'code';
       if (aiKey) type = 'ai';
 
       const novoCmd = {
         name,
         description: `Comando ${name}`,
         type,
-        response: responseText || null,
+        response: null,
         scriptCode: scriptCode || null,
         aiKey: aiKey || null,
-        aiModel: aiModel || 'gpt-3.5-turbo'
+        aiModel: aiModel || 'llama-3.3-70b-versatile'
       };
 
       dadosBots[slotAtual].comandos.push(novoCmd);
       atualizarListaVisual();
       
-      // Limpa os campos
       document.getElementById('cmdName').value = '';
-      document.getElementById('cmdResponse').value = '';
       document.getElementById('cmdScript').value = '';
       document.getElementById('aiKey').value = '';
 
@@ -409,9 +386,9 @@
 
     function injetarTeste(tipo) {
       let cmdObj = tipo === 'ping' ? {
-        name: '/ping', type: 'code', scriptCode: 'const lat = Date.now() - interaction.createdTimestamp;\nreturn `Pong! 🏓 Latência: ${lat}ms`;'
+        name: '/ping', type: 'code', scriptCode: 'const lat = Date.now() - interaction.createdTimestamp;\nreturn `Pong! Latência: ${lat}ms`;'
       } : {
-        name: '/sorteio', type: 'code', scriptCode: 'const num = Math.floor(Math.random() * 100) + 1;\nreturn `🎲 Sorteio: **${num}**`;'
+        name: '/sorteio', type: 'code', scriptCode: 'const num = Math.floor(Math.random() * 100) + 1;\nreturn `Sorteio: ${num}`;'
       };
 
       if (!dadosBots[slotAtual].comandos.some(c => c.name === cmdObj.name)) {
@@ -499,5 +476,5 @@
     }
   </script>
 </body>
-  </html>
-              
+            </html>
+                                                     
