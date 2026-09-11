@@ -253,8 +253,8 @@
     </div>
 
     <script>
-        // URL HTTPS gerada pelo LocalTunnel
-        const API_URL = 'https://nexus-painel-bot-789.loca.lt';
+        // URL HTTPS direta via Serveo (sem avisos nem telas intermediárias)
+        const API_URL = 'https://nexus-bot-panel.serveo.net';
 
         function trocarAba(aba, elemento) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -274,9 +274,7 @@
 
         async function carregarStatusSlot(slot) {
             try {
-                const response = await fetch(`${API_URL}/api/slot/${slot}`, {
-                    headers: { 'bypass-tunnel-reminder': 'true' }
-                });
+                const response = await fetch(`${API_URL}/api/slot/${slot}`);
                 const data = await response.json();
                 if (data && data.token) {
                     document.getElementById('bot-token').value = data.token;
@@ -302,10 +300,7 @@
             try {
                 const response = await fetch(`${API_URL}/api/slot/${slot}/start`, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'bypass-tunnel-reminder': 'true'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token })
                 });
 
@@ -329,8 +324,7 @@
 
             try {
                 const response = await fetch(`${API_URL}/api/slot/${slot}/stop`, { 
-                    method: 'POST',
-                    headers: { 'bypass-tunnel-reminder': 'true' }
+                    method: 'POST' 
                 });
                 const data = await response.json();
                 if (data.success) {
@@ -365,5 +359,5 @@
         carregarStatusSlot(document.getElementById('slot-select').value);
     </script>
 </body>
-                </html>
+                            </html>
     
