@@ -253,7 +253,8 @@
     </div>
 
     <script>
-        const API_URL = 'http://78.154.103.45:9878';
+        // URL HTTPS gerada pelo LocalTunnel
+        const API_URL = 'https://nexus-painel-bot-789.loca.lt';
 
         function trocarAba(aba, elemento) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -273,7 +274,9 @@
 
         async function carregarStatusSlot(slot) {
             try {
-                const response = await fetch(`${API_URL}/api/slot/${slot}`);
+                const response = await fetch(`${API_URL}/api/slot/${slot}`, {
+                    headers: { 'bypass-tunnel-reminder': 'true' }
+                });
                 const data = await response.json();
                 if (data && data.token) {
                     document.getElementById('bot-token').value = data.token;
@@ -299,7 +302,10 @@
             try {
                 const response = await fetch(`${API_URL}/api/slot/${slot}/start`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'bypass-tunnel-reminder': 'true'
+                    },
                     body: JSON.stringify({ token })
                 });
 
@@ -310,7 +316,7 @@
                     msg.innerText = `Erro: ${data.message}`;
                 }
             } catch (err) {
-                msg.innerText = `Erro de conexão.`;
+                msg.innerText = `Erro de conexão com o servidor.`;
             }
         }
 
@@ -322,7 +328,10 @@
             msg.innerText = `Desligando Slot ${slot}...`;
 
             try {
-                const response = await fetch(`${API_URL}/api/slot/${slot}/stop`, { method: 'POST' });
+                const response = await fetch(`${API_URL}/api/slot/${slot}/stop`, { 
+                    method: 'POST',
+                    headers: { 'bypass-tunnel-reminder': 'true' }
+                });
                 const data = await response.json();
                 if (data.success) {
                     document.getElementById('bot-token').value = '';
@@ -356,5 +365,5 @@
         carregarStatusSlot(document.getElementById('slot-select').value);
     </script>
 </body>
-    </html>
+                </html>
     
