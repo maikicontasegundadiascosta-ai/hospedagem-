@@ -30,7 +30,6 @@
             100% { box-shadow: 0 0 0 0 rgba(88, 101, 242, 0); }
         }
 
-        /* Container Principal */
         #app-screen {
             display: flex;
             width: 100%;
@@ -152,7 +151,6 @@
         .btn-delete { background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; font-size: 9px; padding: 3px 7px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
         .btn-delete:hover { background: rgba(239, 68, 68, 0.15); transform: scale(1.05); }
 
-        /* Menu Inferior Fixo */
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -193,7 +191,6 @@
 </head>
 <body>
 
-    <!-- TELA PRINCIPAL -->
     <div id="app-screen" class="fade-in">
         <div>
             <div class="header">
@@ -201,7 +198,6 @@
                 <p>Gerenciamento de slots e comandos</p>
             </div>
 
-            <!-- ABA BOTS -->
             <div id="tab-bots" class="tab-content active">
                 <div class="container-box">
                     <label>Slot Ativo</label>
@@ -224,7 +220,6 @@
                 </div>
             </div>
 
-            <!-- ABA COMANDOS -->
             <div id="tab-comandos" class="tab-content">
                 <div class="container-box">
                     <p style="margin-top:0; font-weight:600; font-size:10px; color:#fff; margin-bottom:5px;" id="comando-slot-titulo">Novo Comando Slash (Slot 3)</p>
@@ -262,7 +257,6 @@
                 </div>
             </div>
 
-            <!-- ABA TESTES -->
             <div id="tab-testes" class="tab-content">
                 <div class="container-box" style="text-align: center; padding: 25px;">
                     <p style="color: #8b9bb4; font-size: 11px; margin: 0;">Logs e testes em tempo real.</p>
@@ -270,7 +264,6 @@
             </div>
         </div>
 
-        <!-- MENU DE ABAS INFERIOR -->
         <div class="nav-bar">
             <button class="nav-item active" onclick="trocarAba('bots', this)">Bots</button>
             <button class="nav-item" onclick="trocarAba('comandos', this)">Comandos</button>
@@ -279,8 +272,7 @@
     </div>
 
     <script>
-        const SERVER_IP = 'http://78.154.103.45:9878';
-        const WISP_API_URL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(SERVER_IP);
+        const SERVER_URL = 'http://78.154.103.45:9878';
 
         function trocarAba(aba, elemento) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -301,7 +293,10 @@
 
         async function carregarStatusSlot(slot) {
             try {
-                const response = await fetch(`${WISP_API_URL}/api/slot/${slot}`);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                const response = await fetch(`${SERVER_URL}/api/slot/${slot}`, { signal: controller.signal });
+                clearTimeout(timeoutId);
                 const data = await response.json();
                 if (data && data.token) {
                     document.getElementById('bot-token').value = data.token;
@@ -325,7 +320,7 @@
             msg.innerText = `Conectando Slot ${slot} na Wisp Byte...`;
 
             try {
-                const response = await fetch(`${WISP_API_URL}/api/slot/${slot}/start`, {
+                const response = await fetch(`${SERVER_URL}/api/slot/${slot}/start`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token })
@@ -333,12 +328,12 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    msg.innerText = data.message || `Bot slot-${slot} ligado e configurado com sucesso!`;
+                    msg.innerText = data.message || `Bot slot-${slot} ligado com sucesso!`;
                 } else {
-                    msg.innerText = `Erro: ${data.error || data.message}`;
+                    msg.innerText = `Erro: ${data.error || data.message || 'Falha no servidor'}`;
                 }
             } catch (err) {
-                msg.innerText = `Erro de conexão com o servidor da Wisp Byte.`;
+                msg.innerText = `Erro de conexão direta com o servidor (HTTP/Mixed Content).`;
             }
         }
 
@@ -350,7 +345,7 @@
             msg.innerText = `Desligando Slot ${slot}...`;
 
             try {
-                const response = await fetch(`${WISP_API_URL}/api/slot/${slot}/stop`, {
+                const response = await fetch(`${SERVER_URL}/api/slot/${slot}/stop`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -392,5 +387,5 @@
         carregarStatusSlot(document.getElementById('slot-select').value);
     </script>
 </body>
-                        </html>
-    
+    </html>
+                                                        
