@@ -18,10 +18,17 @@
             min-height: 100vh;
         }
 
-        .fade-in { animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .fade-in { animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Animação suave extra para itens */
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(88, 101, 242, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(88, 101, 242, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(88, 101, 242, 0); }
         }
 
         /* Container Principal */
@@ -52,6 +59,10 @@
             padding: 11px 12px;
             margin-bottom: 9px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            transition: border-color 0.2s ease;
+        }
+        .container-box:hover {
+            border-color: #1c2638;
         }
 
         label {
@@ -74,9 +85,12 @@
             font-size: 11px;
             margin-bottom: 7px;
             outline: none;
-            transition: border-color 0.15s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        select:focus, input:focus, textarea:focus { border-color: #5865F2; }
+        select:focus, input:focus, textarea:focus { 
+            border-color: #5865F2; 
+            animation: pulseGlow 1.2s infinite;
+        }
 
         .btn {
             width: 100%;
@@ -91,10 +105,10 @@
             justify-content: center;
             gap: 6px;
             margin-bottom: 6px;
-            transition: opacity 0.15s, transform 0.1s;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .btn:hover { opacity: 0.92; }
-        .btn:active { transform: scale(0.98); }
+        .btn:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn:active { transform: scale(0.96) translateY(0); }
 
         .btn-discord { background: #5865F2; color: #fff; }
         .btn-success { background: #10b981; color: #fff; }
@@ -111,6 +125,7 @@
             margin-top: 6px;
             display: none;
             font-weight: 500;
+            animation: fadeIn 0.2s ease forwards;
         }
 
         .command-item {
@@ -122,6 +137,11 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 6px;
+            animation: fadeIn 0.25s ease forwards;
+            transition: border-color 0.15s;
+        }
+        .command-item:hover {
+            border-color: #1c2638;
         }
         .command-info {
             display: flex;
@@ -130,8 +150,8 @@
         }
         .command-name { font-size: 11px; font-weight: 600; color: #fff; }
         .badge-ai { background: #121824; color: #8b9bb4; font-size: 8px; padding: 2px 5px; border-radius: 3px; font-weight: 700; border: 1px solid #1c2638; }
-        .btn-delete { background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; font-size: 9px; padding: 3px 7px; border-radius: 4px; cursor: pointer; transition: background 0.15s; }
-        .btn-delete:hover { background: rgba(239, 68, 68, 0.1); }
+        .btn-delete { background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; font-size: 9px; padding: 3px 7px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+        .btn-delete:hover { background: rgba(239, 68, 68, 0.15); transform: scale(1.05); }
 
         /* Menu Inferior Fixo */
         .nav-bar {
@@ -156,8 +176,9 @@
             cursor: pointer;
             padding: 5px 16px;
             border-radius: 4px;
-            transition: color 0.15s, background 0.15s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .nav-item:active { transform: scale(0.95); }
         .nav-item.active { color: #818cf8; background: rgba(129, 140, 248, 0.08); }
 
         .tab-content { display: none; }
@@ -259,8 +280,7 @@
     </div>
 
     <script>
-        // URL atualizada com o IP e a porta mapeada da Wisp Byte
-        const WISP_API_URL = 'http://78.154.103.43:9729';
+        const WISP_API_URL = 'http://78.154.103.45:9878';
 
         function trocarAba(aba, elemento) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -276,6 +296,19 @@
             const slot = document.getElementById('slot-select').value;
             document.getElementById('config-slot-text').innerText = `Configurando: Slot ${slot}`;
             document.getElementById('comando-slot-titulo').innerText = `Novo Comando Slash (Slot ${slot})`;
+            carregarStatusSlot(slot);
+        }
+
+        async function carregarStatusSlot(slot) {
+            try {
+                const response = await fetch(`${WISP_API_URL}/api/slot/${slot}`);
+                const data = await response.json();
+                if (data && data.token) {
+                    document.getElementById('bot-token').value = data.token;
+                } else {
+                    document.getElementById('bot-token').value = '';
+                }
+            } catch (err) {}
         }
 
         async function ligarBotWisp() {
@@ -292,17 +325,17 @@
             msg.innerText = `Conectando Slot ${slot} na Wisp Byte...`;
 
             try {
-                const response = await fetch(`${WISP_API_URL}/api/bot`, {
+                const response = await fetch(`${WISP_API_URL}/api/slot/${slot}/start`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ slot, token })
+                    body: JSON.stringify({ token })
                 });
 
                 const data = await response.json();
                 if (data.success) {
-                    msg.innerText = `Bot slot-${slot} ligado e configurado com sucesso!`;
+                    msg.innerText = data.message || `Bot slot-${slot} ligado e configurado com sucesso!`;
                 } else {
-                    msg.innerText = `Erro: ${data.message}`;
+                    msg.innerText = `Erro: ${data.error || data.message}`;
                 }
             } catch (err) {
                 msg.innerText = `Erro de conexão com o servidor da Wisp Byte.`;
@@ -317,13 +350,17 @@
             msg.innerText = `Desligando Slot ${slot}...`;
 
             try {
-                const response = await fetch(`${WISP_API_URL}/api/slot/desligar`, {
+                const response = await fetch(`${WISP_API_URL}/api/slot/${slot}/stop`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ slot })
+                    headers: { 'Content-Type': 'application/json' }
                 });
                 const data = await response.json();
-                msg.innerText = data.message || `Slot ${slot} desligado.`;
+                if (data.success) {
+                    document.getElementById('bot-token').value = '';
+                    msg.innerText = data.message || `Slot ${slot} desligado.`;
+                } else {
+                    msg.innerText = `Erro ao desligar slot.`;
+                }
             } catch (err) {
                 msg.innerText = `Erro ao desligar slot.`;
             }
@@ -351,7 +388,9 @@
         function limparComandos() {
             document.getElementById('lista-comandos').innerHTML = '';
         }
+
+        carregarStatusSlot(document.getElementById('slot-select').value);
     </script>
 </body>
-                            </html>
+                                                                        </html>
     
