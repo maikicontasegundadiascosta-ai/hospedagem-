@@ -3,45 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel do Bot SaaS</title>
+  <title>Hospedagem de Bot Discord</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-    body { background-color: #121214; color: #e1e1e6; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-    .card { background: #202024; border-radius: 8px; padding: 20px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-    h2 { color: #8257e5; margin-bottom: 15px; font-size: 1.2rem; text-align: center; }
-    button { width: 100%; padding: 12px; background: #8257e5; border: none; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    button:active { opacity: 0.8; }
-    #status { margin-top: 15px; padding: 10px; background: #121214; border-radius: 4px; font-size: 0.9rem; word-break: break-all; }
+    body { background-color: #121214; color: #e1e1e6; padding: 20px; display: flex; justify-content: center; }
+    .card { background: #202024; border-radius: 8px; padding: 20px; width: 100%; max-width: 400px; }
+    h2 { color: #5865F2; margin-bottom: 15px; text-align: center; }
+    input { width: 100%; padding: 10px; margin-bottom: 10px; background: #121214; border: 1px solid #333; color: white; border-radius: 4px; }
+    button { width: 100%; padding: 12px; background: #5865F2; border: none; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
+    .stop-btn { background: #ed4245; }
+    #status { margin-top: 10px; padding: 10px; background: #121214; border-radius: 4px; font-size: 0.85rem; }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h2>Painel de Controle</h2>
-    <p>Status da API: <strong style="color: #04d361;">Online</strong></p>
+    <h2>Hospedar Bot Discord</h2>
+    <input type="text" id="botToken" placeholder="Cole o Token do Bot aqui">
     
-    <button onclick="iniciarBot()">Ligar Bot #1</button>
+    <button onclick="gerenciarBot('start')">Ligar Bot no Discord</button>
+    <button class="stop-btn" onclick="gerenciarBot('stop')">Desligar Bot</button>
     
-    <div id="status">Aguardando comando...</div>
+    <div id="status">Aguardando token...</div>
   </div>
 
   <script>
     const API_URL = "https://hospedagem-wfd0.onrender.com";
 
-    async function iniciarBot() {
+    async function gerenciarBot(acao) {
+      const token = document.getElementById('botToken').value;
       const statusDiv = document.getElementById('status');
-      statusDiv.innerText = "Enviando comando...";
+      
+      if (acao === 'start' && !token) {
+        statusDiv.innerText = "Insira um token válido!";
+        return;
+      }
+
+      statusDiv.innerText = "Processando no servidor...";
 
       try {
-        const response = await fetch(`${API_URL}/api/bot/start`, {
+        const response = await fetch(`${API_URL}/api/bot/${acao}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ botId: 'bot-1' })
+          body: JSON.stringify({ botId: 'bot-principal', token: token })
         });
         const data = await response.json();
-        statusDiv.innerText = `Resposta: ${data.message}`;
+        statusDiv.innerText = data.message;
       } catch (err) {
-        statusDiv.innerText = "Erro ao conectar com o servidor.";
+        statusDiv.innerText = "Erro de conexão com o servidor.";
       }
     }
   </script>
