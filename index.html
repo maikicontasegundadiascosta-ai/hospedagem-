@@ -279,9 +279,8 @@
     </div>
 
     <script>
-        // PROXY ATUALIZADO COM O PARÂMETRO ?url= OBRIGATÓRIO
-        const TARGET_URL = 'http://78.154.103.45:9878';
-        const WISP_API_URL = 'https://corsproxy.io/?url=' + encodeURIComponent(TARGET_URL);
+        const SERVER_IP = 'http://78.154.103.45:9878';
+        const WISP_API_URL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(SERVER_IP);
 
         function trocarAba(aba, elemento) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -393,5 +392,5 @@
         carregarStatusSlot(document.getElementById('slot-select').value);
     </script>
 </body>
-                </html>
+                        </html>
     
