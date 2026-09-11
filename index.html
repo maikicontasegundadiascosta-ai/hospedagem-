@@ -3,54 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hospedagem de Bot Discord</title>
+  <title>Painel SaaS Bot Discord</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
     body { background-color: #121214; color: #e1e1e6; padding: 20px; display: flex; justify-content: center; }
-    .card { background: #202024; border-radius: 8px; padding: 20px; width: 100%; max-width: 400px; }
-    h2 { color: #5865F2; margin-bottom: 15px; text-align: center; }
-    input { width: 100%; padding: 10px; margin-bottom: 10px; background: #121214; border: 1px solid #333; color: white; border-radius: 4px; }
-    button { width: 100%; padding: 12px; background: #5865F2; border: none; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
-    .stop-btn { background: #ed4245; }
-    #status { margin-top: 10px; padding: 10px; background: #121214; border-radius: 4px; font-size: 0.85rem; }
+    .card { background: #202024; border-radius: 8px; padding: 20px; width: 100%; max-width: 500px; }
+    h2, h3 { color: #5865F2; margin-bottom: 12px; }
+    input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: #121214; border: 1px solid #333; color: white; border-radius: 4px; }
+    button { width: 100%; padding: 12px; background: #5865F2; border: none; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+    .btn-add { background: #04d361; margin-bottom: 15px; }
+    .btn-stop { background: #ed4245; margin-top: 10px; }
+    .cmd-item { background: #121214; padding: 10px; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid #5865F2; }
+    #status { margin-top: 15px; padding: 10px; background: #121214; border-radius: 4px; font-size: 0.85rem; }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h2>Hospedar Bot Discord</h2>
-    <input type="text" id="botToken" placeholder="Cole o Token do Bot aqui">
+    <h2>Gerenciador do Bot</h2>
+    <input type="text" id="botToken" placeholder="Token do Bot no Discord">
+
+    <h3>Criar Novo Comando em /</h3>
+    <input type="text" id="cmdName" placeholder="Nome do comando (ex: perguntar)">
+    <input type="text" id="cmdDesc" placeholder="Descrição do comando">
     
-    <button onclick="gerenciarBot('start')">Ligar Bot no Discord</button>
-    <button class="stop-btn" onclick="gerenciarBot('stop')">Desligar Bot</button>
-    
-    <div id="status">Aguardando token...</div>
+    <select id="cmdType" onchange="toggleAIFields()">
+      <option value="text">Resposta de Texto Simples</option>
+      <option value="ai">Integrar com Inteligência Artificial (OpenAI)</option>
+    </select>
+
+    <div id="textResponseArea">
+      <textarea id="cmdResponse" placeholder="Texto de resposta do bot..."></textarea>
+    </div>
+
+    <div id="aiResponseArea" style="display: none;">
+      <input type="password" id="aiKey" placeholder="Cole sua API Key da OpenAI (sk-...)">
+    </div>
+
+    <button class="btn-add" onclick="adicionarComando()">+ Adicionar Comando na Lista</button>
+
+    <h3>Comandos Configurados:</h3>
+    <div id="commandList"></div>
+
+    <button onclick="salvarELigar()">Ligar / Atualizar Bot no Discord</button>
+    <button class="btn-stop" onclick="desligarBot()">Desligar Bot</button>
+
+    <div id="status">Aguardando ações...</div>
   </div>
 
   <script>
     const API_URL = "https://hospedagem-wfd0.onrender.com";
+    let comandos = [];
 
-    async function gerenciarBot(acao) {
+    function toggleAIFields() {
+      const isAI = document.getElementById('cmdType').value === 'ai';
+      document.getElementById('textResponseArea').style.display = isAI ? 'none' : 'block';
+      document.getElementById('aiResponseArea').style.display = isAI ? 'block' : 'none';
+    }
+
+    function adicionarComando() {
+      const name = document.getElementById('cmdName').value.trim();
+      const description = document.getElementById('cmdDesc').value.trim();
+      const type = document.getElementById('cmdType').value;
+      const response = document.getElementById('cmdResponse').value;
+      const aiKey = document.getElementById('aiKey').value;
+
+      if (!name) return alert('Digite o nome do comando!');
+
+      const novoCmd = {
+        name,
+        description,
+        useAI: type === 'ai',
+        response: type === 'text' ? response : null,
+        aiKey: type === 'ai' ? aiKey : null
+      };
+
+      comandos.push(novoCmd);
+      atualizarListaVisual();
+      
+      // Limpa campos
+      document.getElementById('cmdName').value = '';
+      document.getElementById('cmdDesc').value = '';
+      document.getElementById('cmdResponse').value = '';
+    }
+
+    function atualizarListaVisual() {
+      const container = document.getElementById('commandList');
+      container.innerHTML = '';
+      comandos.forEach((cmd, index) => {
+        container.innerHTML += `
+          <div class="cmd-item">
+            <strong>/${cmd.name}</strong> - ${cmd.description}<br>
+            <small>Tipo: ${cmd.useAI ? 'IA (OpenAI)' : 'Texto Estático'}</small>
+          </div>
+        `;
+      });
+    }
+
+    async function salvarELigar() {
       const token = document.getElementById('botToken').value;
       const statusDiv = document.getElementById('status');
-      
-      if (acao === 'start' && !token) {
-        statusDiv.innerText = "Insira um token válido!";
-        return;
-      }
 
-      statusDiv.innerText = "Processando no servidor...";
+      if (!token) return alert('Insira o token do bot!');
+
+      statusDiv.innerText = "Registrando comandos e ligando o bot...";
 
       try {
-        const response = await fetch(`${API_URL}/api/bot/${acao}`, {
+        const res = await fetch(`${API_URL}/api/bot/start`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ botId: 'bot-principal', token: token })
+          body: JSON.stringify({ botId: 'bot-usuario', token, customCommands: comandos })
         });
-        const data = await response.json();
+        const data = await res.json();
         statusDiv.innerText = data.message;
       } catch (err) {
-        statusDiv.innerText = "Erro de conexão com o servidor.";
+        statusDiv.innerText = "Erro ao conectar ao servidor.";
+      }
+    }
+
+    async function desligarBot() {
+      const statusDiv = document.getElementById('status');
+      try {
+        const res = await fetch(`${API_URL}/api/bot/stop`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ botId: 'bot-usuario' })
+        });
+        const data = await res.json();
+        statusDiv.innerText = data.message;
+      } catch (err) {
+        statusDiv.innerText = "Erro ao conectar ao servidor.";
       }
     }
   </script>
