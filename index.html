@@ -75,8 +75,8 @@
       margin-bottom: 12px; 
       font-weight: 600; 
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 6px;
     }
     
     .field { margin-bottom: 12px; }
@@ -192,6 +192,17 @@
     }
     .btn-del:hover { background: rgba(239, 68, 68, 0.1); }
 
+    .btn-clear-all {
+      background: transparent;
+      color: var(--danger);
+      font-size: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .btn-clear-all:hover { text-decoration: underline; }
+
     .nav-bar {
       position: fixed;
       bottom: 0;
@@ -254,7 +265,7 @@
         
         <div class="field">
           <label>Token do Discord</label>
-          <input type="password" id="botToken" placeholder="Cole o token do bot aqui...">
+          <input type="password" id="botToken" placeholder="Cole o token do bot aqui..." oninput="salvarTokenDigitado()">
         </div>
         
         <button class="btn btn-success" onclick="salvarELigar()">Ligar / Atualizar Bot</button>
@@ -278,7 +289,7 @@
         <div class="section-box">
           <div class="field" style="margin-bottom: 0;">
             <label>Script JavaScript (Opcional)</label>
-            <textarea id="cmdScript" rows="3" placeholder="const lat = Date.now() - interaction.createdTimestamp;&#10;return `Pong! ${lat}ms`;" style="margin-top: 5px;"></textarea>
+            <textarea id="cmdScript" rows="3" placeholder="const lat = Date.now() - interaction.createdTimestamp;&#10;return `Pong! Latência: ${lat}ms`;" style="margin-top: 5px;"></textarea>
           </div>
         </div>
 
@@ -298,7 +309,10 @@
       </div>
 
       <div class="card">
-        <div class="card-title">Comandos Configurados</div>
+        <div class="card-title">
+          <span>Comandos Configurados</span>
+          <button class="btn-clear-all" onclick="limparTodosComandos()">Limpar Todos</button>
+        </div>
         <div id="commandList" class="cmd-list"></div>
       </div>
     </div>
@@ -328,13 +342,28 @@
 
   <script>
     const API_URL = "https://hospedagem-wfd0.onrender.com";
-    let dadosBots = {
+    
+    let dadosBots = JSON.parse(localStorage.getItem('daos_hospedagem_bots')) || {
       'bot-1': { token: '', comandos: [] },
       'bot-2': { token: '', comandos: [] },
       'bot-3': { token: '', comandos: [] },
       'bot-4': { token: '', comandos: [] }
     };
+    
     let slotAtual = 'bot-1';
+
+    document.getElementById('botToken').value = dadosBots['bot-1'].token || '';
+    atualizarListaVisual();
+
+    function salvarNoLocalStorage() {
+      localStorage.setItem('daos_hospedagem_bots', JSON.stringify(dadosBots));
+    }
+
+    function salvarTokenDigitado() {
+      const token = document.getElementById('botToken').value.trim();
+      dadosBots[slotAtual].token = token;
+      salvarNoLocalStorage();
+    }
 
     function switchTab(tabId, element) {
       document.querySelectorAll('.screen').forEach(sec => sec.classList.remove('active'));
@@ -348,7 +377,7 @@
       const num = slotAtual.replace('bot-', '');
       document.getElementById('slotTitle').innerText = `Configurando: Slot ${num}`;
       document.getElementById('cmdSlotTitle').innerText = `Novo Comando Slash (Slot ${num})`;
-      document.getElementById('botToken').value = dadosBots[slotAtual].token;
+      document.getElementById('botToken').value = dadosBots[slotAtual].token || '';
       atualizarListaVisual();
     }
 
@@ -375,6 +404,7 @@
       };
 
       dadosBots[slotAtual].comandos.push(novoCmd);
+      salvarNoLocalStorage();
       atualizarListaVisual();
       
       document.getElementById('cmdName').value = '';
@@ -393,6 +423,7 @@
 
       if (!dadosBots[slotAtual].comandos.some(c => c.name === cmdObj.name)) {
         dadosBots[slotAtual].comandos.push(cmdObj);
+        salvarNoLocalStorage();
         atualizarListaVisual();
         const msg = document.getElementById('test-msg');
         msg.style.display = 'block';
@@ -407,7 +438,16 @@
 
     function removerComando(index) {
       dadosBots[slotAtual].comandos.splice(index, 1);
+      salvarNoLocalStorage();
       atualizarListaVisual();
+    }
+
+    function limparTodosComandos() {
+      if (confirm('Tem certeza que deseja apagar todos os comandos deste slot?')) {
+        dadosBots[slotAtual].comandos = [];
+        salvarNoLocalStorage();
+        atualizarListaVisual();
+      }
     }
 
     function atualizarListaVisual() {
@@ -444,6 +484,8 @@
     async function salvarELigar() {
       const token = document.getElementById('botToken').value.trim();
       dadosBots[slotAtual].token = token;
+      salvarNoLocalStorage();
+
       if (!token) return mostrarStatus('Insira o token do bot!', 'erro');
 
       mostrarStatus('Conectando e sincronizando...', 'ok');
@@ -476,5 +518,5 @@
     }
   </script>
 </body>
-            </html>
-                                                     
+  </html>
+              
