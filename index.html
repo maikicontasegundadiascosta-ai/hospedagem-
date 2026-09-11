@@ -3,177 +3,309 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Multi-Bot SaaS</title>
+  <title>Painel Multi-Bot Cloud</title>
   <style>
     :root {
-      --bg-dark: #1e1f22;
-      --bg-sidebar: #2b2d31;
-      --bg-card: #313338;
-      --text-main: #dbdee1;
-      --text-muted: #949ba4;
+      --bg-main: #0f1015;
+      --bg-card: #181920;
+      --bg-input: #121318;
+      --border-color: #2b2d38;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
       --brand: #5865F2;
       --brand-hover: #4752c4;
-      --success: #23a559;
-      --danger: #da373c;
+      --success: #10b981;
+      --danger: #ef4444;
+      --ai-color: #ec4899;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { display: flex; height: 100vh; background-color: var(--bg-dark); color: var(--text-main); overflow: hidden; }
-
-    .sidebar { width: 260px; background-color: var(--bg-sidebar); display: flex; flex-direction: column; padding: 20px 10px; }
-    .logo-area { display: flex; align-items: center; gap: 10px; padding: 0 10px 20px 10px; border-bottom: 1px solid #3f4147; margin-bottom: 20px; }
-    .logo-icon { width: 32px; height: 32px; background: var(--brand); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
-    .logo-area h2 { font-size: 16px; color: white; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
-    .nav-item { padding: 12px 15px; margin-bottom: 5px; border-radius: 6px; cursor: pointer; color: var(--text-muted); font-weight: 500; transition: 0.2s; }
-    .nav-item:hover { background-color: #35373c; color: var(--text-main); }
-    .nav-item.active { background-color: var(--brand); color: white; }
+    body { 
+      background-color: var(--bg-main); 
+      color: var(--text-main); 
+      padding: 16px;
+      padding-bottom: 90px;
+      display: flex;
+      justify-content: center;
+    }
 
-    .main-content { flex: 1; padding: 40px; overflow-y: auto; }
-    .header { margin-bottom: 30px; }
-    .header h1 { font-size: 24px; color: white; margin-bottom: 5px; }
-    .header p { color: var(--text-muted); }
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .app-header { 
+      text-align: center; 
+      margin-bottom: 24px; 
+      padding-top: 10px;
+    }
+    .app-header h2 { 
+      color: white; 
+      font-size: 22px; 
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .app-header p { 
+      color: var(--text-muted); 
+      font-size: 13px; 
+      margin-top: 4px; 
+    }
 
     .section { display: none; }
-    .section.active { display: block; }
+    .section.active { display: block; animation: fadeIn 0.2s ease-in-out; }
 
-    .card { background: var(--bg-card); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .card-title { font-size: 18px; color: white; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-    
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    input, select, textarea { width: 100%; padding: 12px; background: var(--bg-dark); border: 1px solid #1e1f22; color: var(--text-main); border-radius: 6px; font-size: 14px; outline: none; transition: 0.2s; }
-    input:focus, select:focus, textarea:focus { border-color: var(--brand); }
-    
-    .help-text { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-    button { padding: 12px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; color: white; }
+    .card { 
+      background: var(--bg-card); 
+      border-radius: 16px; 
+      padding: 20px; 
+      margin-bottom: 16px; 
+      border: 1px solid var(--border-color); 
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .card-title { 
+      font-size: 15px; 
+      color: white; 
+      margin-bottom: 16px; 
+      font-weight: 600; 
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .form-group { margin-bottom: 16px; }
+    
+    label { 
+      display: block; 
+      margin-bottom: 6px; 
+      font-size: 11px; 
+      font-weight: 700; 
+      color: var(--text-muted); 
+      text-transform: uppercase; 
+      letter-spacing: 0.5px;
+    }
+    
+    input, select, textarea { 
+      width: 100%; 
+      padding: 12px 14px; 
+      background: var(--bg-input); 
+      border: 1px solid var(--border-color); 
+      color: var(--text-main); 
+      border-radius: 10px; 
+      font-size: 14px; 
+      outline: none; 
+      transition: border-color 0.2s;
+    }
+    
+    input:focus, select:focus, textarea:focus { 
+      border-color: var(--brand); 
+    }
+
+    button { 
+      padding: 13px; 
+      border: none; 
+      border-radius: 10px; 
+      font-size: 14px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      color: white; 
+      width: 100%; 
+      transition: all 0.2s; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
     .btn-primary { background: var(--brand); }
     .btn-primary:hover { background: var(--brand-hover); }
-    .btn-success { background: var(--success); width: 100%; font-size: 16px; margin-bottom: 10px; }
-    .btn-danger { background: var(--danger); width: 100%; }
     
-    .cmd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
-    .cmd-item { background: var(--bg-dark); border: 1px solid #3f4147; border-radius: 8px; padding: 15px; border-top: 4px solid var(--brand); }
-    .cmd-item.ai-border { border-top-color: #eb459e; }
-    .cmd-item h4 { color: white; margin-bottom: 5px; font-size: 16px; }
-    .cmd-item p { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
-    .cmd-badge { display: inline-block; padding: 4px 8px; background: #2b2d31; border-radius: 4px; font-size: 11px; font-weight: bold; }
+    .btn-success { background: var(--success); margin-bottom: 10px; }
+    .btn-success:hover { opacity: 0.9; }
+    
+    .btn-danger { background: var(--danger); }
+    .btn-danger:hover { opacity: 0.9; }
+    
+    .cmd-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+    
+    .cmd-item { 
+      background: var(--bg-input); 
+      border: 1px solid var(--border-color); 
+      border-radius: 12px; 
+      padding: 14px; 
+      border-left: 4px solid var(--brand); 
+    }
+    .cmd-item.ai-border { border-left-color: var(--ai-color); }
+    
+    .cmd-item h4 { color: white; margin-bottom: 3px; font-size: 14px; font-weight: 600; }
+    .cmd-item p { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+    
+    .cmd-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
+    
+    .cmd-badge { 
+      padding: 3px 8px; 
+      background: rgba(255,255,255,0.05); 
+      border-radius: 6px; 
+      font-size: 10px; 
+      font-weight: 700; 
+    }
+    
+    .btn-del { 
+      background: transparent; 
+      color: var(--danger); 
+      border: 1px solid rgba(239, 68, 68, 0.3); 
+      width: auto; 
+      padding: 5px 12px; 
+      font-size: 11px; 
+      border-radius: 6px;
+    }
+    .btn-del:hover { background: rgba(239, 68, 68, 0.1); }
 
-    #status-msg { margin-top: 15px; padding: 15px; border-radius: 6px; display: none; font-weight: 500; text-align: center; }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(15, 16, 21, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid var(--border-color);
+      z-index: 1000;
+    }
+    
+    .nav-item {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 600;
+      flex: 1;
+      transition: color 0.2s;
+    }
+    
+    .nav-item span { font-size: 16px; display: block; margin-bottom: 2px; }
+    .nav-item.active { color: var(--brand); }
+
+    .msg { 
+      margin-top: 14px; 
+      padding: 12px; 
+      border-radius: 10px; 
+      display: none; 
+      font-weight: 500; 
+      text-align: center; 
+      font-size: 13px; 
+    }
   </style>
 </head>
 <body>
 
-  <div class="sidebar">
-    <div class="logo-area">
-      <div class="logo-icon">4B</div>
-      <h2>Multi-Bot SaaS</h2>
+  <div class="container">
+    <div class="app-header">
+      <h2>Bot Hosting Hub</h2>
+      <p>Gerencie seus 4 slots de bots dedicados</p>
     </div>
-    <div class="nav-item active" onclick="switchTab('dashboard', this)">Gerenciar Bots (1-4)</div>
-    <div class="nav-item" onclick="switchTab('commands', this)">Construtor de Comandos</div>
-  </div>
 
-  <div class="main-content">
-    
-    <!-- DASHBOARD TAB -->
+    <!-- ABA 1: GERENCIAR BOTS (DASHBOARD) -->
     <div id="dashboard" class="section active">
-      <div class="header">
-        <h1>Seus Bots Ativos (Máx: 4)</h1>
-        <p>Selecione um slot para configurar e ligar até 4 bots simultaneamente.</p>
-      </div>
-
       <div class="card">
         <div class="form-group">
-          <label>Selecione o Slot do Bot</label>
+          <label>Slot de Gerenciamento</label>
           <select id="selectedBotSlot" onchange="mudarSlotBot()">
-            <option value="bot-1">Bot Slot #1</option>
-            <option value="bot-2">Bot Slot #2</option>
-            <option value="bot-3">Bot Slot #3</option>
-            <option value="bot-4">Bot Slot #4</option>
+            <option value="bot-1">Bot Slot [ #1 ]</option>
+            <option value="bot-2">Bot Slot [ #2 ]</option>
+            <option value="bot-3">Bot Slot [ #3 ]</option>
+            <option value="bot-4">Bot Slot [ #4 ]</option>
           </select>
         </div>
 
-        <div class="card-title" id="slotTitle">Configurando: Bot Slot #1</div>
+        <div class="card-title" id="slotTitle" style="color: var(--brand);">Configurando: Bot Slot #1</div>
         
         <div class="form-group">
-          <label>Token deste Bot</label>
-          <input type="password" id="botToken" placeholder="Cole o token do Discord aqui...">
+          <label>Token do Bot do Discord</label>
+          <input type="password" id="botToken" placeholder="Cole o token secreto aqui...">
         </div>
         
-        <button class="btn-success" onclick="salvarELigar()">🚀 Ligar Este Bot</button>
-        <button class="btn-danger" onclick="desligarBot()">🛑 Desligar Este Bot</button>
+        <button class="btn-success" onclick="salvarELigar()">Ligar / Atualizar Bot</button>
+        <button class="btn-danger" onclick="desligarBot()">Desligar Slot Atual</button>
         
-        <div id="status-msg"></div>
+        <div id="status-msg" class="msg"></div>
       </div>
     </div>
 
-    <!-- COMMANDS TAB -->
+    <!-- ABA 2: CONFIGURAR COMANDOS -->
     <div id="commands" class="section">
-      <div class="header">
-        <h1>Comandos para o Slot Selecionado</h1>
-        <p>Crie comandos em barra (/) personalizados ou com IA para o bot ativo.</p>
-      </div>
-
       <div class="card">
-        <div class="card-title" id="cmdSlotTitle">Adicionar Comando ao: Bot Slot #1</div>
+        <div class="card-title" id="cmdSlotTitle">Novo Comando (Bot Slot #1)</div>
         
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-          <div class="form-group" style="flex: 1;">
-            <label>Nome do Comando</label>
-            <input type="text" id="cmdName" placeholder="ex: ajuda, ia, clima...">
-          </div>
-          <div class="form-group" style="flex: 2;">
-            <label>Descrição</label>
-            <input type="text" id="cmdDesc" placeholder="Explicação rápida do comando">
-          </div>
+        <div class="form-group">
+          <label>Nome do Comando (sem barra)</label>
+          <input type="text" id="cmdName" placeholder="ex: ajuda, perguntar">
+        </div>
+
+        <div class="form-group">
+          <label>Descrição do Comando</label>
+          <input type="text" id="cmdDesc" placeholder="Explicação rápida do que faz">
         </div>
 
         <div class="form-group">
           <label>Tipo de Resposta</label>
           <select id="cmdType" onchange="toggleAIFields()">
-            <option value="text">Texto Estático</option>
-            <option value="ai">IA Universal (OpenAI, Groq, OpenRouter, etc.)</option>
+            <option value="text">Texto Simples Estático</option>
+            <option value="ai">Inteligência Artificial (OpenAI / Groq)</option>
           </select>
         </div>
 
         <div id="textResponseArea" class="form-group">
-          <label>Resposta de Texto</label>
-          <textarea id="cmdResponse" rows="3" placeholder="Mensagem que o bot vai enviar..."></textarea>
+          <label>Mensagem de Resposta</label>
+          <textarea id="cmdResponse" rows="3" placeholder="O que o bot vai responder no chat..."></textarea>
         </div>
 
         <div id="aiResponseArea" style="display: none;">
           <div class="form-group">
-            <label>URL Base da API</label>
+            <label>Endpoint da API</label>
             <input type="text" id="aiUrl" value="https://api.openai.com/v1/chat/completions">
           </div>
-          <div style="display: flex; gap: 15px;">
-            <div class="form-group" style="flex: 1;">
-              <label>Modelo</label>
-              <input type="text" id="aiModel" value="gpt-3.5-turbo">
-            </div>
-            <div class="form-group" style="flex: 2;">
-              <label>API Key</label>
-              <input type="password" id="aiKey" placeholder="sk-...">
-            </div>
+          <div class="form-group">
+            <label>Modelo da IA</label>
+            <input type="text" id="aiModel" value="gpt-3.5-turbo">
+          </div>
+          <div class="form-group">
+            <label>Chave de API (Secret Key)</label>
+            <input type="password" id="aiKey" placeholder="sk-...">
           </div>
         </div>
 
-        <button class="btn-primary" onclick="adicionarComando()" style="width: 100%;">+ Adicionar Comando</button>
+        <button class="btn-primary" onclick="adicionarComando()">Adicionar Comando à Fila</button>
       </div>
 
-      <div>
-        <h3 style="color: white; margin-top: 30px;">Comandos do Slot Atual</h3>
+      <div class="card">
+        <div class="card-title">Comandos Configurados</div>
         <div id="commandList" class="cmd-grid"></div>
       </div>
     </div>
 
+    <!-- MENU INFERIOR FIXO -->
+    <div class="bottom-nav">
+      <div class="nav-item active" onclick="switchTab('dashboard', this)">
+        <span>[+]</span>Bots
+      </div>
+      <div class="nav-item" onclick="switchTab('commands', this)">
+        <span>[#]</span>Comandos
+      </div>
+    </div>
   </div>
 
   <script>
-    const API_URL = "https://hospedagem-wfd0.onrender.com"; 
+    const API_URL = "https://hospedagem-wfd0.onrender.com";
 
-    // Armazena os dados e tokens separadamente para cada um dos 4 slots
     let dadosBots = {
       'bot-1': { token: '', comandos: [] },
       'bot-2': { token: '', comandos: [] },
@@ -195,9 +327,8 @@
       const num = slotAtual.replace('bot-', '');
       
       document.getElementById('slotTitle').innerText = `Configurando: Bot Slot #${num}`;
-      document.getElementById('cmdSlotTitle').innerText = `Adicionar Comando ao: Bot Slot #${num}`;
+      document.getElementById('cmdSlotTitle').innerText = `Novo Comando (Bot Slot #${num})`;
       
-      // Carrega o token e comandos salvos deste slot específico na tela
       document.getElementById('botToken').value = dadosBots[slotAtual].token;
       atualizarListaVisual();
     }
@@ -217,7 +348,7 @@
       const aiModel = document.getElementById('aiModel').value;
       const aiKey = document.getElementById('aiKey').value;
 
-      if (!name) return alert('Digite o nome do comando!');
+      if (!name) return alert('Por favor, informe o nome do comando!');
 
       const novoCmd = {
         name,
@@ -247,8 +378,8 @@
       container.innerHTML = '';
       const lista = dadosBots[slotAtual].comandos;
 
-      if(lista.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted);">Nenhum comando criado neste slot.</p>';
+      if (lista.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 10px;">Nenhum comando criado neste slot ainda.</p>';
         return;
       }
 
@@ -257,11 +388,11 @@
           <div class="cmd-item ${cmd.useAI ? 'ai-border' : ''}">
             <h4>/${cmd.name}</h4>
             <p>${cmd.description}</p>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span class="cmd-badge" style="color: ${cmd.useAI ? '#eb459e' : '#23a559'}">
-                ${cmd.useAI ? `IA: ${cmd.aiModel}` : 'Texto'}
+            <div class="cmd-footer">
+              <span class="cmd-badge" style="color: ${cmd.useAI ? 'var(--ai-color)' : 'var(--success)'}">
+                ${cmd.useAI ? `IA: ${cmd.aiModel}` : 'Texto Simples'}
               </span>
-              <button onclick="removerComando(${index})" style="background: none; color: var(--danger); padding: 5px; border: 1px solid var(--danger);">Excluir</button>
+              <button class="btn-del" onclick="removerComando(${index})">Excluir</button>
             </div>
           </div>
         `;
@@ -271,8 +402,8 @@
     function mostrarStatus(msg, cor) {
       const statusDiv = document.getElementById('status-msg');
       statusDiv.style.display = 'block';
-      statusDiv.style.backgroundColor = cor === 'erro' ? 'rgba(218, 55, 60, 0.2)' : 'rgba(35, 165, 89, 0.2)';
-      statusDiv.style.color = cor === 'erro' ? '#ff6b70' : '#4ade80';
+      statusDiv.style.backgroundColor = cor === 'erro' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)';
+      statusDiv.style.color = cor === 'erro' ? '#f87171' : '#34d399';
       statusDiv.innerText = msg;
     }
 
@@ -280,9 +411,9 @@
       const token = document.getElementById('botToken').value.trim();
       dadosBots[slotAtual].token = token;
 
-      if (!token) return mostrarStatus('Insira o token para este bot!', 'erro');
+      if (!token) return mostrarStatus('Insira o token do bot antes de ligar!', 'erro');
 
-      mostrarStatus(`⏳ Conectando o ${slotAtual}...`, 'ok');
+      mostrarStatus(`Conectando o ${slotAtual}...`, 'ok');
 
       try {
         const res = await fetch(`${API_URL}/api/bot/start`, {
@@ -297,17 +428,17 @@
         const data = await res.json();
         
         if (data.success) {
-          mostrarStatus(`✅ ${data.message}`, 'ok');
+          mostrarStatus(`[OK] ${data.message}`, 'ok');
         } else {
-          mostrarStatus(`❌ ${data.message}`, 'erro');
+          mostrarStatus(`[Erro] ${data.message}`, 'erro');
         }
       } catch (err) {
-        mostrarStatus("❌ Falha de comunicação com o servidor.", 'erro');
+        mostrarStatus("[Erro] Falha de comunicacao com o servidor.", 'erro');
       }
     }
 
     async function desligarBot() {
-      mostrarStatus(`⏳ Desligando ${slotAtual}...`, 'ok');
+      mostrarStatus(`Desligando ${slotAtual}...`, 'ok');
       try {
         const res = await fetch(`${API_URL}/api/bot/stop`, {
           method: 'POST',
@@ -315,12 +446,12 @@
           body: JSON.stringify({ botId: slotAtual })
         });
         const data = await res.json();
-        mostrarStatus(`🛑 ${data.message}`, 'ok');
+        mostrarStatus(`[OK] ${data.message}`, 'ok');
       } catch (err) {
-        mostrarStatus("❌ Falha ao comunicar com o servidor.", 'erro');
+        mostrarStatus("[Erro] Erro ao comunicar com o servidor.", 'erro');
       }
     }
   </script>
 </body>
   </html>
-              
+            
