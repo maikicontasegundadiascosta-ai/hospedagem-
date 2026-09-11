@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Bot SaaS</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+    body { background-color: #121214; color: #e1e1e6; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+    .card { background: #202024; border-radius: 8px; padding: 20px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    h2 { color: #8257e5; margin-bottom: 15px; font-size: 1.2rem; text-align: center; }
+    button { width: 100%; padding: 12px; background: #8257e5; border: none; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    button:active { opacity: 0.8; }
+    #status { margin-top: 15px; padding: 10px; background: #121214; border-radius: 4px; font-size: 0.9rem; word-break: break-all; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Painel de Controle</h2>
+    <p>Status da API: <strong style="color: #04d361;">Online</strong></p>
+    
+    <button onclick="iniciarBot()">Ligar Bot #1</button>
+    
+    <div id="status">Aguardando comando...</div>
+  </div>
+
+  <script>
+    const API_URL = "https://hospedagem-wfd0.onrender.com";
+
+    async function iniciarBot() {
+      const statusDiv = document.getElementById('status');
+      statusDiv.innerText = "Enviando comando...";
+
+      try {
+        const response = await fetch(`${API_URL}/api/bot/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ botId: 'bot-1' })
+        });
+        const data = await response.json();
+        statusDiv.innerText = `Resposta: ${data.message}`;
+      } catch (err) {
+        statusDiv.innerText = "Erro ao conectar com o servidor.";
+      }
+    }
+  </script>
+</body>
+</html>
