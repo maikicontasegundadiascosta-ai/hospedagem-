@@ -279,9 +279,9 @@
     </div>
 
     <script>
-        // PROXY HTTPS PARA BURLAR O BLOQUEIO DE MIXED CONTENT DO ANDROID WEBVIEW
+        // PROXY ATUALIZADO COM O PARÂMETRO ?url= OBRIGATÓRIO
         const TARGET_URL = 'http://78.154.103.45:9878';
-        const WISP_API_URL = 'https://corsproxy.io/?' + encodeURIComponent(TARGET_URL);
+        const WISP_API_URL = 'https://corsproxy.io/?url=' + encodeURIComponent(TARGET_URL);
 
         function trocarAba(aba, elemento) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -393,5 +393,5 @@
         carregarStatusSlot(document.getElementById('slot-select').value);
     </script>
 </body>
-                    </html>
-                
+                </html>
+    
