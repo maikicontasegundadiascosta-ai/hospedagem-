@@ -3,57 +3,204 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel SaaS Bot Discord</title>
+  <title>Painel Multi-Bot SaaS</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-    body { background-color: #121214; color: #e1e1e6; padding: 20px; display: flex; justify-content: center; }
-    .card { background: #202024; border-radius: 8px; padding: 20px; width: 100%; max-width: 500px; }
-    h2, h3 { color: #5865F2; margin-bottom: 12px; }
-    input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: #121214; border: 1px solid #333; color: white; border-radius: 4px; }
-    button { width: 100%; padding: 12px; background: #5865F2; border: none; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-    .btn-add { background: #04d361; margin-bottom: 15px; }
-    .btn-stop { background: #ed4245; margin-top: 10px; }
-    .cmd-item { background: #121214; padding: 10px; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid #5865F2; }
-    #status { margin-top: 15px; padding: 10px; background: #121214; border-radius: 4px; font-size: 0.85rem; }
+    :root {
+      --bg-dark: #1e1f22;
+      --bg-sidebar: #2b2d31;
+      --bg-card: #313338;
+      --text-main: #dbdee1;
+      --text-muted: #949ba4;
+      --brand: #5865F2;
+      --brand-hover: #4752c4;
+      --success: #23a559;
+      --danger: #da373c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { display: flex; height: 100vh; background-color: var(--bg-dark); color: var(--text-main); overflow: hidden; }
+
+    .sidebar { width: 260px; background-color: var(--bg-sidebar); display: flex; flex-direction: column; padding: 20px 10px; }
+    .logo-area { display: flex; align-items: center; gap: 10px; padding: 0 10px 20px 10px; border-bottom: 1px solid #3f4147; margin-bottom: 20px; }
+    .logo-icon { width: 32px; height: 32px; background: var(--brand); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+    .logo-area h2 { font-size: 16px; color: white; }
+    
+    .nav-item { padding: 12px 15px; margin-bottom: 5px; border-radius: 6px; cursor: pointer; color: var(--text-muted); font-weight: 500; transition: 0.2s; }
+    .nav-item:hover { background-color: #35373c; color: var(--text-main); }
+    .nav-item.active { background-color: var(--brand); color: white; }
+
+    .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+    .header { margin-bottom: 30px; }
+    .header h1 { font-size: 24px; color: white; margin-bottom: 5px; }
+    .header p { color: var(--text-muted); }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .card { background: var(--bg-card); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .card-title { font-size: 18px; color: white; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+    
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    input, select, textarea { width: 100%; padding: 12px; background: var(--bg-dark); border: 1px solid #1e1f22; color: var(--text-main); border-radius: 6px; font-size: 14px; outline: none; transition: 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: var(--brand); }
+    
+    .help-text { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+
+    button { padding: 12px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; color: white; }
+    .btn-primary { background: var(--brand); }
+    .btn-primary:hover { background: var(--brand-hover); }
+    .btn-success { background: var(--success); width: 100%; font-size: 16px; margin-bottom: 10px; }
+    .btn-danger { background: var(--danger); width: 100%; }
+    
+    .cmd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
+    .cmd-item { background: var(--bg-dark); border: 1px solid #3f4147; border-radius: 8px; padding: 15px; border-top: 4px solid var(--brand); }
+    .cmd-item.ai-border { border-top-color: #eb459e; }
+    .cmd-item h4 { color: white; margin-bottom: 5px; font-size: 16px; }
+    .cmd-item p { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+    .cmd-badge { display: inline-block; padding: 4px 8px; background: #2b2d31; border-radius: 4px; font-size: 11px; font-weight: bold; }
+
+    #status-msg { margin-top: 15px; padding: 15px; border-radius: 6px; display: none; font-weight: 500; text-align: center; }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h2>Gerenciador do Bot</h2>
-    <input type="text" id="botToken" placeholder="Token do Bot no Discord">
+  <div class="sidebar">
+    <div class="logo-area">
+      <div class="logo-icon">4B</div>
+      <h2>Multi-Bot SaaS</h2>
+    </div>
+    <div class="nav-item active" onclick="switchTab('dashboard', this)">Gerenciar Bots (1-4)</div>
+    <div class="nav-item" onclick="switchTab('commands', this)">Construtor de Comandos</div>
+  </div>
 
-    <h3>Criar Novo Comando em /</h3>
-    <input type="text" id="cmdName" placeholder="Nome do comando (ex: perguntar)">
-    <input type="text" id="cmdDesc" placeholder="Descrição do comando">
+  <div class="main-content">
     
-    <select id="cmdType" onchange="toggleAIFields()">
-      <option value="text">Resposta de Texto Simples</option>
-      <option value="ai">Integrar com Inteligência Artificial (OpenAI)</option>
-    </select>
+    <!-- DASHBOARD TAB -->
+    <div id="dashboard" class="section active">
+      <div class="header">
+        <h1>Seus Bots Ativos (Máx: 4)</h1>
+        <p>Selecione um slot para configurar e ligar até 4 bots simultaneamente.</p>
+      </div>
 
-    <div id="textResponseArea">
-      <textarea id="cmdResponse" placeholder="Texto de resposta do bot..."></textarea>
+      <div class="card">
+        <div class="form-group">
+          <label>Selecione o Slot do Bot</label>
+          <select id="selectedBotSlot" onchange="mudarSlotBot()">
+            <option value="bot-1">Bot Slot #1</option>
+            <option value="bot-2">Bot Slot #2</option>
+            <option value="bot-3">Bot Slot #3</option>
+            <option value="bot-4">Bot Slot #4</option>
+          </select>
+        </div>
+
+        <div class="card-title" id="slotTitle">Configurando: Bot Slot #1</div>
+        
+        <div class="form-group">
+          <label>Token deste Bot</label>
+          <input type="password" id="botToken" placeholder="Cole o token do Discord aqui...">
+        </div>
+        
+        <button class="btn-success" onclick="salvarELigar()">🚀 Ligar Este Bot</button>
+        <button class="btn-danger" onclick="desligarBot()">🛑 Desligar Este Bot</button>
+        
+        <div id="status-msg"></div>
+      </div>
     </div>
 
-    <div id="aiResponseArea" style="display: none;">
-      <input type="password" id="aiKey" placeholder="Cole sua API Key da OpenAI (sk-...)">
+    <!-- COMMANDS TAB -->
+    <div id="commands" class="section">
+      <div class="header">
+        <h1>Comandos para o Slot Selecionado</h1>
+        <p>Crie comandos em barra (/) personalizados ou com IA para o bot ativo.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title" id="cmdSlotTitle">Adicionar Comando ao: Bot Slot #1</div>
+        
+        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Nome do Comando</label>
+            <input type="text" id="cmdName" placeholder="ex: ajuda, ia, clima...">
+          </div>
+          <div class="form-group" style="flex: 2;">
+            <label>Descrição</label>
+            <input type="text" id="cmdDesc" placeholder="Explicação rápida do comando">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de Resposta</label>
+          <select id="cmdType" onchange="toggleAIFields()">
+            <option value="text">Texto Estático</option>
+            <option value="ai">IA Universal (OpenAI, Groq, OpenRouter, etc.)</option>
+          </select>
+        </div>
+
+        <div id="textResponseArea" class="form-group">
+          <label>Resposta de Texto</label>
+          <textarea id="cmdResponse" rows="3" placeholder="Mensagem que o bot vai enviar..."></textarea>
+        </div>
+
+        <div id="aiResponseArea" style="display: none;">
+          <div class="form-group">
+            <label>URL Base da API</label>
+            <input type="text" id="aiUrl" value="https://api.openai.com/v1/chat/completions">
+          </div>
+          <div style="display: flex; gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+              <label>Modelo</label>
+              <input type="text" id="aiModel" value="gpt-3.5-turbo">
+            </div>
+            <div class="form-group" style="flex: 2;">
+              <label>API Key</label>
+              <input type="password" id="aiKey" placeholder="sk-...">
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="adicionarComando()" style="width: 100%;">+ Adicionar Comando</button>
+      </div>
+
+      <div>
+        <h3 style="color: white; margin-top: 30px;">Comandos do Slot Atual</h3>
+        <div id="commandList" class="cmd-grid"></div>
+      </div>
     </div>
 
-    <button class="btn-add" onclick="adicionarComando()">+ Adicionar Comando na Lista</button>
-
-    <h3>Comandos Configurados:</h3>
-    <div id="commandList"></div>
-
-    <button onclick="salvarELigar()">Ligar / Atualizar Bot no Discord</button>
-    <button class="btn-stop" onclick="desligarBot()">Desligar Bot</button>
-
-    <div id="status">Aguardando ações...</div>
   </div>
 
   <script>
-    const API_URL = "https://hospedagem-wfd0.onrender.com";
-    let comandos = [];
+    const API_URL = "https://hospedagem-wfd0.onrender.com"; 
+
+    // Armazena os dados e tokens separadamente para cada um dos 4 slots
+    let dadosBots = {
+      'bot-1': { token: '', comandos: [] },
+      'bot-2': { token: '', comandos: [] },
+      'bot-3': { token: '', comandos: [] },
+      'bot-4': { token: '', comandos: [] }
+    };
+
+    let slotAtual = 'bot-1';
+
+    function switchTab(tabId, element) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      element.classList.add('active');
+    }
+
+    function mudarSlotBot() {
+      slotAtual = document.getElementById('selectedBotSlot').value;
+      const num = slotAtual.replace('bot-', '');
+      
+      document.getElementById('slotTitle').innerText = `Configurando: Bot Slot #${num}`;
+      document.getElementById('cmdSlotTitle').innerText = `Adicionar Comando ao: Bot Slot #${num}`;
+      
+      // Carrega o token e comandos salvos deste slot específico na tela
+      document.getElementById('botToken').value = dadosBots[slotAtual].token;
+      atualizarListaVisual();
+    }
 
     function toggleAIFields() {
       const isAI = document.getElementById('cmdType').value === 'ai';
@@ -62,79 +209,118 @@
     }
 
     function adicionarComando() {
-      const name = document.getElementById('cmdName').value.trim();
+      const name = document.getElementById('cmdName').value.trim().toLowerCase();
       const description = document.getElementById('cmdDesc').value.trim();
       const type = document.getElementById('cmdType').value;
       const response = document.getElementById('cmdResponse').value;
+      const aiUrl = document.getElementById('aiUrl').value;
+      const aiModel = document.getElementById('aiModel').value;
       const aiKey = document.getElementById('aiKey').value;
 
       if (!name) return alert('Digite o nome do comando!');
 
       const novoCmd = {
         name,
-        description,
+        description: description || 'Sem descrição',
         useAI: type === 'ai',
         response: type === 'text' ? response : null,
+        aiUrl: type === 'ai' ? aiUrl : null,
+        aiModel: type === 'ai' ? aiModel : null,
         aiKey: type === 'ai' ? aiKey : null
       };
 
-      comandos.push(novoCmd);
+      dadosBots[slotAtual].comandos.push(novoCmd);
       atualizarListaVisual();
-      
-      // Limpa campos
+
       document.getElementById('cmdName').value = '';
       document.getElementById('cmdDesc').value = '';
       document.getElementById('cmdResponse').value = '';
     }
 
+    function removerComando(index) {
+      dadosBots[slotAtual].comandos.splice(index, 1);
+      atualizarListaVisual();
+    }
+
     function atualizarListaVisual() {
       const container = document.getElementById('commandList');
       container.innerHTML = '';
-      comandos.forEach((cmd, index) => {
+      const lista = dadosBots[slotAtual].comandos;
+
+      if(lista.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted);">Nenhum comando criado neste slot.</p>';
+        return;
+      }
+
+      lista.forEach((cmd, index) => {
         container.innerHTML += `
-          <div class="cmd-item">
-            <strong>/${cmd.name}</strong> - ${cmd.description}<br>
-            <small>Tipo: ${cmd.useAI ? 'IA (OpenAI)' : 'Texto Estático'}</small>
+          <div class="cmd-item ${cmd.useAI ? 'ai-border' : ''}">
+            <h4>/${cmd.name}</h4>
+            <p>${cmd.description}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="cmd-badge" style="color: ${cmd.useAI ? '#eb459e' : '#23a559'}">
+                ${cmd.useAI ? `IA: ${cmd.aiModel}` : 'Texto'}
+              </span>
+              <button onclick="removerComando(${index})" style="background: none; color: var(--danger); padding: 5px; border: 1px solid var(--danger);">Excluir</button>
+            </div>
           </div>
         `;
       });
     }
 
+    function mostrarStatus(msg, cor) {
+      const statusDiv = document.getElementById('status-msg');
+      statusDiv.style.display = 'block';
+      statusDiv.style.backgroundColor = cor === 'erro' ? 'rgba(218, 55, 60, 0.2)' : 'rgba(35, 165, 89, 0.2)';
+      statusDiv.style.color = cor === 'erro' ? '#ff6b70' : '#4ade80';
+      statusDiv.innerText = msg;
+    }
+
     async function salvarELigar() {
-      const token = document.getElementById('botToken').value;
-      const statusDiv = document.getElementById('status');
+      const token = document.getElementById('botToken').value.trim();
+      dadosBots[slotAtual].token = token;
 
-      if (!token) return alert('Insira o token do bot!');
+      if (!token) return mostrarStatus('Insira o token para este bot!', 'erro');
 
-      statusDiv.innerText = "Registrando comandos e ligando o bot...";
+      mostrarStatus(`⏳ Conectando o ${slotAtual}...`, 'ok');
 
       try {
         const res = await fetch(`${API_URL}/api/bot/start`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ botId: 'bot-usuario', token, customCommands: comandos })
+          body: JSON.stringify({
+            botId: slotAtual,
+            token: token,
+            customCommands: dadosBots[slotAtual].comandos
+          })
         });
         const data = await res.json();
-        statusDiv.innerText = data.message;
+        
+        if (data.success) {
+          mostrarStatus(`✅ ${data.message}`, 'ok');
+        } else {
+          mostrarStatus(`❌ ${data.message}`, 'erro');
+        }
       } catch (err) {
-        statusDiv.innerText = "Erro ao conectar ao servidor.";
+        mostrarStatus("❌ Falha de comunicação com o servidor.", 'erro');
       }
     }
 
     async function desligarBot() {
-      const statusDiv = document.getElementById('status');
+      mostrarStatus(`⏳ Desligando ${slotAtual}...`, 'ok');
       try {
         const res = await fetch(`${API_URL}/api/bot/stop`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ botId: 'bot-usuario' })
+          body: JSON.stringify({ botId: slotAtual })
         });
         const data = await res.json();
-        statusDiv.innerText = data.message;
+        mostrarStatus(`🛑 ${data.message}`, 'ok');
       } catch (err) {
-        statusDiv.innerText = "Erro ao conectar ao servidor.";
+        mostrarStatus("❌ Falha ao comunicar com o servidor.", 'erro');
       }
     }
   </script>
 </body>
-</html>
+  </html>
+              
