@@ -57,10 +57,6 @@
             padding: 11px 12px;
             margin-bottom: 9px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-            transition: border-color 0.2s ease;
-        }
-        .container-box:hover {
-            border-color: #1c2638;
         }
 
         label {
@@ -83,7 +79,7 @@
             font-size: 11px;
             margin-bottom: 7px;
             outline: none;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
         }
         select:focus, input:focus, textarea:focus { 
             border-color: #5865F2; 
@@ -103,10 +99,10 @@
             justify-content: center;
             gap: 6px;
             margin-bottom: 6px;
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.15s ease;
         }
         .btn:hover { opacity: 0.92; transform: translateY(-1px); }
-        .btn:active { transform: scale(0.96) translateY(0); }
+        .btn:active { transform: scale(0.96); }
 
         .btn-discord { background: #5865F2; color: #fff; }
         .btn-success { background: #10b981; color: #fff; }
@@ -123,7 +119,6 @@
             margin-top: 6px;
             display: none;
             font-weight: 500;
-            animation: fadeIn 0.2s ease forwards;
         }
 
         .command-item {
@@ -135,21 +130,11 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 6px;
-            animation: fadeIn 0.25s ease forwards;
-            transition: border-color 0.15s;
         }
-        .command-item:hover {
-            border-color: #1c2638;
-        }
-        .command-info {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .command-info { display: flex; align-items: center; gap: 6px; }
         .command-name { font-size: 11px; font-weight: 600; color: #fff; }
         .badge-ai { background: #121824; color: #8b9bb4; font-size: 8px; padding: 2px 5px; border-radius: 3px; font-weight: 700; border: 1px solid #1c2638; }
-        .btn-delete { background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; font-size: 9px; padding: 3px 7px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
-        .btn-delete:hover { background: rgba(239, 68, 68, 0.15); transform: scale(1.05); }
+        .btn-delete { background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; font-size: 9px; padding: 3px 7px; border-radius: 4px; cursor: pointer; }
 
         .nav-bar {
             position: fixed;
@@ -173,20 +158,13 @@
             cursor: pointer;
             padding: 5px 16px;
             border-radius: 4px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .nav-item:active { transform: scale(0.95); }
         .nav-item.active { color: #818cf8; background: rgba(129, 140, 248, 0.08); }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        .section-title {
-            font-size: 9px;
-            color: #f43f5e;
-            margin-bottom: 3px;
-            font-weight: 700;
-        }
+        .section-title { font-size: 9px; color: #f43f5e; margin-bottom: 3px; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -198,6 +176,7 @@
                 <p>Gerenciamento de slots e comandos</p>
             </div>
 
+            <!-- ABA BOTS -->
             <div id="tab-bots" class="tab-content active">
                 <div class="container-box">
                     <label>Slot Ativo</label>
@@ -220,6 +199,7 @@
                 </div>
             </div>
 
+            <!-- ABA COMANDOS -->
             <div id="tab-comandos" class="tab-content">
                 <div class="container-box">
                     <p style="margin-top:0; font-weight:600; font-size:10px; color:#fff; margin-bottom:5px;" id="comando-slot-titulo">Novo Comando Slash (Slot 3)</p>
@@ -257,6 +237,7 @@
                 </div>
             </div>
 
+            <!-- ABA TESTES -->
             <div id="tab-testes" class="tab-content">
                 <div class="container-box" style="text-align: center; padding: 25px;">
                     <p style="color: #8b9bb4; font-size: 11px; margin: 0;">Logs e testes em tempo real.</p>
@@ -272,7 +253,7 @@
     </div>
 
     <script>
-        const SERVER_URL = 'http://78.154.103.45:9878';
+        const API_URL = 'http://78.154.103.45:9878';
 
         function trocarAba(aba, elemento) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -280,7 +261,6 @@
             
             const target = document.getElementById('tab-' + aba);
             target.classList.add('active');
-            target.classList.add('fade-in');
             elemento.classList.add('active');
         }
 
@@ -293,10 +273,7 @@
 
         async function carregarStatusSlot(slot) {
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000);
-                const response = await fetch(`${SERVER_URL}/api/slot/${slot}`, { signal: controller.signal });
-                clearTimeout(timeoutId);
+                const response = await fetch(`${API_URL}/api/slot/${slot}`);
                 const data = await response.json();
                 if (data && data.token) {
                     document.getElementById('bot-token').value = data.token;
@@ -317,10 +294,10 @@
             }
 
             msg.style.display = 'block';
-            msg.innerText = `Conectando Slot ${slot} na Wisp Byte...`;
+            msg.innerText = `Conectando Slot ${slot}...`;
 
             try {
-                const response = await fetch(`${SERVER_URL}/api/slot/${slot}/start`, {
+                const response = await fetch(`${API_URL}/api/slot/${slot}/start`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token })
@@ -328,12 +305,12 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    msg.innerText = data.message || `Bot slot-${slot} ligado com sucesso!`;
+                    msg.innerText = data.message || `Bot ligado com sucesso!`;
                 } else {
-                    msg.innerText = `Erro: ${data.error || data.message || 'Falha no servidor'}`;
+                    msg.innerText = `Erro: ${data.message}`;
                 }
             } catch (err) {
-                msg.innerText = `Erro de conexão direta com o servidor (HTTP/Mixed Content).`;
+                msg.innerText = `Erro de conexão.`;
             }
         }
 
@@ -345,16 +322,11 @@
             msg.innerText = `Desligando Slot ${slot}...`;
 
             try {
-                const response = await fetch(`${SERVER_URL}/api/slot/${slot}/stop`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                const response = await fetch(`${API_URL}/api/slot/${slot}/stop`, { method: 'POST' });
                 const data = await response.json();
                 if (data.success) {
                     document.getElementById('bot-token').value = '';
                     msg.innerText = data.message || `Slot ${slot} desligado.`;
-                } else {
-                    msg.innerText = `Erro ao desligar slot.`;
                 }
             } catch (err) {
                 msg.innerText = `Erro ao desligar slot.`;
@@ -363,10 +335,7 @@
 
         function adicionarComando() {
             const nome = document.getElementById('cmd-name').value;
-            if(!nome) {
-                alert('Insira o nome do comando!');
-                return;
-            }
+            if(!nome) return alert('Insira o nome do comando!');
             const lista = document.getElementById('lista-comandos');
             lista.innerHTML += `
                 <div class="command-item">
@@ -388,4 +357,4 @@
     </script>
 </body>
     </html>
-                                                        
+    
