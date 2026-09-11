@@ -259,7 +259,8 @@
     </div>
 
     <script>
-        const WISP_API_URL = 'https://SEU-DOMINIO-WISPBYTE.wispbyte.gg';
+        // URL atualizada com o IP e a porta mapeada da Wisp Byte
+        const WISP_API_URL = 'http://78.154.103.43:9729';
 
         function trocarAba(aba, elemento) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -291,7 +292,7 @@
             msg.innerText = `Conectando Slot ${slot} na Wisp Byte...`;
 
             try {
-                const response = await fetch(`${WISP_API_URL}/api/slot/ligar`, {
+                const response = await fetch(`${WISP_API_URL}/api/bot`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ slot, token })
@@ -299,7 +300,7 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    msg.innerText = `Bot bot-${slot} ligado e comandos sincronizados!`;
+                    msg.innerText = `Bot slot-${slot} ligado e configurado com sucesso!`;
                 } else {
                     msg.innerText = `Erro: ${data.message}`;
                 }
@@ -322,7 +323,7 @@
                     body: JSON.stringify({ slot })
                 });
                 const data = await response.json();
-                msg.innerText = data.message;
+                msg.innerText = data.message || `Slot ${slot} desligado.`;
             } catch (err) {
                 msg.innerText = `Erro ao desligar slot.`;
             }
@@ -353,4 +354,4 @@
     </script>
 </body>
                             </html>
-                        
+    
