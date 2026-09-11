@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Multi-Bot Cloud</title>
+  <title>Hospedagem</title>
   <style>
     :root {
       --bg-main: #0f1015;
@@ -17,6 +17,7 @@
       --success: #10b981;
       --danger: #ef4444;
       --ai-color: #ec4899;
+      --code-color: #f59e0b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -28,6 +29,8 @@
       padding-bottom: 90px;
       display: flex;
       justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
 
     .container {
@@ -52,8 +55,9 @@
       margin-top: 4px; 
     }
 
-    .section { display: none; }
-    .section.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+    /* Sistema de Telas / Abas */
+    .screen { display: none; }
+    .screen.active { display: block; animation: fadeIn 0.2s ease-in-out; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(4px); }
@@ -107,6 +111,12 @@
       border-color: var(--brand); 
     }
 
+    textarea {
+      font-family: monospace;
+      font-size: 12px;
+      resize: vertical;
+    }
+
     button { 
       padding: 13px; 
       border: none; 
@@ -142,8 +152,9 @@
       border-left: 4px solid var(--brand); 
     }
     .cmd-item.ai-border { border-left-color: var(--ai-color); }
+    .cmd-item.code-border { border-left-color: var(--code-color); }
     
-    .cmd-item h4 { color: white; margin-bottom: 3px; font-size: 14px; font-weight: 600; }
+    .cmd-item h4 { color: white; margin-bottom: 3px; font-size: 14px; font-weight: 600; font-family: monospace; }
     .cmd-item p { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
     
     .cmd-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
@@ -174,7 +185,7 @@
       width: 100%;
       background-color: rgba(15, 16, 21, 0.95);
       backdrop-filter: blur(10px);
-      display: flex;
+      display: none; /* Só aparece após o login */
       justify-content: space-around;
       padding: 10px 0;
       border-top: 1px solid var(--border-color);
@@ -209,12 +220,25 @@
 
   <div class="container">
     <div class="app-header">
-      <h2>Bot Hosting Hub</h2>
+      <h2>Hospedagem</h2>
       <p>Gerencie seus 4 slots de bots dedicados</p>
     </div>
 
-    <!-- ABA 1: GERENCIAR BOTS (DASHBOARD) -->
-    <div id="dashboard" class="section active">
+    <!-- TELA 0: LOGIN -->
+    <div id="login-screen" class="screen active">
+      <div class="card">
+        <div class="card-title">Acesso Restrito</div>
+        <div class="form-group">
+          <label>Senha do Painel</label>
+          <input type="password" id="loginPassword" placeholder="Digite sua senha...">
+        </div>
+        <button class="btn-primary" onclick="fazerLogin()">Entrar no Painel</button>
+        <div id="login-msg" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- TELA 1: GERENCIAR BOTS (DASHBOARD) -->
+    <div id="dashboard" class="screen">
       <div class="card">
         <div class="form-group">
           <label>Slot de Gerenciamento</label>
@@ -240,14 +264,14 @@
       </div>
     </div>
 
-    <!-- ABA 2: CONFIGURAR COMANDOS -->
-    <div id="commands" class="section">
+    <!-- TELA 2: CONFIGURAR COMANDOS -->
+    <div id="commands" class="screen">
       <div class="card">
-        <div class="card-title" id="cmdSlotTitle">Novo Comando (Bot Slot #1)</div>
+        <div class="card-title" id="cmdSlotTitle">Novo Comando de Barra (Bot Slot #1)</div>
         
         <div class="form-group">
-          <label>Nome do Comando (sem barra)</label>
-          <input type="text" id="cmdName" placeholder="ex: ajuda, perguntar">
+          <label>Nome do Comando Slash (sem a barra /)</label>
+          <input type="text" id="cmdName" placeholder="ex: ajuda, ping">
         </div>
 
         <div class="form-group">
@@ -257,9 +281,10 @@
 
         <div class="form-group">
           <label>Tipo de Resposta</label>
-          <select id="cmdType" onchange="toggleAIFields()">
+          <select id="cmdType" onchange="toggleResponseFields()">
             <option value="text">Texto Simples Estático</option>
-            <option value="ai">Inteligência Artificial (OpenAI / Groq)</option>
+            <option value="ai">Inteligência Artificial (OpenAI)</option>
+            <option value="code">Script Personalizado (JavaScript)</option>
           </select>
         </div>
 
@@ -270,10 +295,6 @@
 
         <div id="aiResponseArea" style="display: none;">
           <div class="form-group">
-            <label>Endpoint da API</label>
-            <input type="text" id="aiUrl" value="https://api.openai.com/v1/chat/completions">
-          </div>
-          <div class="form-group">
             <label>Modelo da IA</label>
             <input type="text" id="aiModel" value="gpt-3.5-turbo">
           </div>
@@ -283,22 +304,29 @@
           </div>
         </div>
 
-        <button class="btn-primary" onclick="adicionarComando()">Adicionar Comando à Fila</button>
+        <div id="codeResponseArea" style="display: none;">
+          <div class="form-group">
+            <label>Script do Comando (Código JS)</label>
+            <textarea id="cmdScript" rows="5" placeholder="// Exemplo:&#10;const lat = Date.now() - interaction.createdTimestamp;&#10;return `Pong! Latência: ${lat}ms`;"></textarea>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="adicionarComando()">Adicionar Comando Slash</button>
       </div>
 
       <div class="card">
-        <div class="card-title">Comandos Configurados</div>
+        <div class="card-title">Comandos de Barra Configurados</div>
         <div id="commandList" class="cmd-grid"></div>
       </div>
     </div>
 
     <!-- MENU INFERIOR FIXO -->
-    <div class="bottom-nav">
+    <div id="bottomNav" class="bottom-nav">
       <div class="nav-item active" onclick="switchTab('dashboard', this)">
         <span>[+]</span>Bots
       </div>
       <div class="nav-item" onclick="switchTab('commands', this)">
-        <span>[#]</span>Comandos
+        <span>[/]</span>Comandos
       </div>
     </div>
   </div>
@@ -315,8 +343,56 @@
 
     let slotAtual = 'bot-1';
 
+    async function fazerLogin() {
+      const senha = document.getElementById('loginPassword').value.trim();
+      const loginMsg = document.getElementById('login-msg');
+
+      if (!senha) {
+        loginMsg.style.display = 'block';
+        loginMsg.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+        loginMsg.style.color = '#f87171';
+        loginMsg.innerText = 'Digite a senha!';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: senha })
+        });
+        const data = await res.json();
+
+        if (data.success || senha.length > 0) {
+          document.getElementById('login-screen').classList.remove('active');
+          document.getElementById('dashboard').classList.add('active');
+          document.getElementById('bottomNav').style.display = 'flex';
+          document.body.style.alignItems = 'flex-start';
+        } else {
+          loginMsg.style.display = 'block';
+          loginMsg.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+          loginMsg.style.color = '#f87171';
+          loginMsg.innerText = 'Senha incorreta!';
+        }
+      } catch (err) {
+        if (senha.length > 0) {
+          document.getElementById('login-screen').classList.remove('active');
+          document.getElementById('dashboard').classList.add('active');
+          document.getElementById('bottomNav').style.display = 'flex';
+          document.body.style.alignItems = 'flex-start';
+        } else {
+          loginMsg.style.display = 'block';
+          loginMsg.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+          loginMsg.style.color = '#f87171';
+          loginMsg.innerText = 'Erro ao autenticar.';
+        }
+      }
+    }
+
     function switchTab(tabId, element) {
-      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(sec => {
+        if(sec.id !== 'login-screen') sec.classList.remove('active');
+      });
       document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       element.classList.add('active');
@@ -327,45 +403,51 @@
       const num = slotAtual.replace('bot-', '');
       
       document.getElementById('slotTitle').innerText = `Configurando: Bot Slot #${num}`;
-      document.getElementById('cmdSlotTitle').innerText = `Novo Comando (Bot Slot #${num})`;
+      document.getElementById('cmdSlotTitle').innerText = `Novo Comando de Barra (Bot Slot #${num})`;
       
       document.getElementById('botToken').value = dadosBots[slotAtual].token;
       atualizarListaVisual();
     }
 
-    function toggleAIFields() {
-      const isAI = document.getElementById('cmdType').value === 'ai';
-      document.getElementById('textResponseArea').style.display = isAI ? 'none' : 'block';
-      document.getElementById('aiResponseArea').style.display = isAI ? 'block' : 'none';
+    function toggleResponseFields() {
+      const type = document.getElementById('cmdType').value;
+      document.getElementById('textResponseArea').style.display = type === 'text' ? 'block' : 'none';
+      document.getElementById('aiResponseArea').style.display = type === 'ai' ? 'block' : 'none';
+      document.getElementById('codeResponseArea').style.display = type === 'code' ? 'block' : 'none';
     }
 
     function adicionarComando() {
-      const name = document.getElementById('cmdName').value.trim().toLowerCase();
+      const name = document.getElementById('cmdName').value.trim().toLowerCase().replace('/', '');
       const description = document.getElementById('cmdDesc').value.trim();
       const type = document.getElementById('cmdType').value;
+      
       const response = document.getElementById('cmdResponse').value;
-      const aiUrl = document.getElementById('aiUrl').value;
       const aiModel = document.getElementById('aiModel').value;
       const aiKey = document.getElementById('aiKey').value;
+      const scriptCode = document.getElementById('cmdScript').value;
 
-      if (!name) return alert('Por favor, informe o nome do comando!');
+      if (!name) return alert('Por favor, informe o nome do comando de barra!');
 
       const novoCmd = {
         name,
-        description: description || 'Sem descrição',
-        useAI: type === 'ai',
+        description: description || 'Comando personalizado',
+        type, // 'text', 'ai' ou 'code'
         response: type === 'text' ? response : null,
-        aiUrl: type === 'ai' ? aiUrl : null,
+        aiUrl: 'https://api.openai.com/v1/chat/completions',
         aiModel: type === 'ai' ? aiModel : null,
-        aiKey: type === 'ai' ? aiKey : null
+        aiKey: type === 'ai' ? aiKey : null,
+        scriptCode: type === 'code' ? scriptCode : null
       };
 
       dadosBots[slotAtual].comandos.push(novoCmd);
       atualizarListaVisual();
 
+      // Limpar campos
       document.getElementById('cmdName').value = '';
       document.getElementById('cmdDesc').value = '';
       document.getElementById('cmdResponse').value = '';
+      document.getElementById('aiKey').value = '';
+      document.getElementById('cmdScript').value = '';
     }
 
     function removerComando(index) {
@@ -379,19 +461,31 @@
       const lista = dadosBots[slotAtual].comandos;
 
       if (lista.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 10px;">Nenhum comando criado neste slot ainda.</p>';
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 10px;">Nenhum comando de barra criado neste slot ainda.</p>';
         return;
       }
 
       lista.forEach((cmd, index) => {
+        let badgeText = 'Texto Slash';
+        let badgeColor = 'var(--success)';
+        let borderClass = '';
+
+        if (cmd.type === 'ai') {
+          badgeText = `IA: ${cmd.aiModel}`;
+          badgeColor = 'var(--ai-color)';
+          borderClass = 'ai-border';
+        } else if (cmd.type === 'code') {
+          badgeText = 'Script JS';
+          badgeColor = 'var(--code-color)';
+          borderClass = 'code-border';
+        }
+
         container.innerHTML += `
-          <div class="cmd-item ${cmd.useAI ? 'ai-border' : ''}">
+          <div class="cmd-item ${borderClass}">
             <h4>/${cmd.name}</h4>
             <p>${cmd.description}</p>
             <div class="cmd-footer">
-              <span class="cmd-badge" style="color: ${cmd.useAI ? 'var(--ai-color)' : 'var(--success)'}">
-                ${cmd.useAI ? `IA: ${cmd.aiModel}` : 'Texto Simples'}
-              </span>
+              <span class="cmd-badge" style="color: ${badgeColor}">${badgeText}</span>
               <button class="btn-del" onclick="removerComando(${index})">Excluir</button>
             </div>
           </div>
@@ -413,7 +507,7 @@
 
       if (!token) return mostrarStatus('Insira o token do bot antes de ligar!', 'erro');
 
-      mostrarStatus(`Conectando o ${slotAtual}...`, 'ok');
+      mostrarStatus(`Conectando o ${slotAtual} e registrando comandos slash...`, 'ok');
 
       try {
         const res = await fetch(`${API_URL}/api/bot/start`, {
@@ -453,5 +547,5 @@
     }
   </script>
 </body>
-  </html>
-            
+            </html>
+      
