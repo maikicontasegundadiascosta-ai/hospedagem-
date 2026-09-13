@@ -253,8 +253,8 @@
     </div>
 
     <script>
-        // Endereço IP fixo da Wispbyte fornecido no painel
-        const API_URL = 'http://78.154.103.48:9920';
+        // URL segura oficial da Wispbyte com HTTPS integrado
+        const API_URL = 'https://Hospedagem.wisp.uno';
 
         function trocarAba(aba, elemento) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
