@@ -253,7 +253,7 @@
     </div>
 
     <script>
-        // URL segura oficial da Wispbyte com HTTPS integrado
+        // URL oficial da Wispbyte com HTTPS integrado
         const API_URL = 'https://Hospedagem.wisp.uno';
 
         function trocarAba(aba, elemento) {
