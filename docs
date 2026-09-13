@@ -253,7 +253,7 @@
     </div>
 
     <script>
-        // URL oficial da Wispbyte com HTTPS integrado
+        // URL oficial e exata da Wispbyte apontando para o servidor online
         const API_URL = 'https://Hospedagem.wisp.uno';
 
         function trocarAba(aba, elemento) {
@@ -295,6 +295,9 @@
             }
 
             msg.style.display = 'block';
+            msg.style.background = 'rgba(129, 140, 248, 0.08)';
+            msg.style.borderColor = 'rgba(129, 140, 248, 0.3)';
+            msg.style.color = '#818cf8';
             msg.innerText = `Conectando Slot ${slot}...`;
 
             try {
@@ -306,11 +309,20 @@
 
                 const data = await response.json();
                 if (data.success) {
+                    msg.style.background = 'rgba(16, 185, 129, 0.08)';
+                    msg.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                    msg.style.color = '#34d399';
                     msg.innerText = data.message || `Bot ligado com sucesso!`;
                 } else {
+                    msg.style.background = 'rgba(239, 68, 68, 0.08)';
+                    msg.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                    msg.style.color = '#ef4444';
                     msg.innerText = `Erro: ${data.message}`;
                 }
             } catch (err) {
+                msg.style.background = 'rgba(239, 68, 68, 0.08)';
+                msg.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                msg.style.color = '#ef4444';
                 msg.innerText = `Erro de conexão com o servidor.`;
             }
         }
